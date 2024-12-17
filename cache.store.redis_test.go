@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gradientzero/comby-redis-store"
+	"github.com/gradientzero/comby-store-redis"
 	"github.com/gradientzero/comby/v2"
 )
 
@@ -107,7 +107,7 @@ func TestCacheStore1(t *testing.T) {
 	if err := cacheStore.Reset(ctx); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// close connection
 	if err := cacheStore.Close(ctx); err != nil {
 		t.Fatalf("failed to close connection: %v", err)

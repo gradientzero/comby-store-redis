@@ -1,4 +1,4 @@
-# comby-redis-store
+# comby-store-redis
 
 Simple implementation of the `CacheStore` interface defined in [comby](https://github.com/gradientzero/comby) with Redis. **comby** is a powerful application framework designed with Event Sourcing and Command Query Responsibility Segregation (CQRS) principles, written in Go.
 
@@ -17,17 +17,17 @@ docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:la
 
 ## Installation
 
-*comby-redis-store* supports the latest version of comby (v2), requires Go version 1.22+ and is based on Redis client v9.0.0.
+*comby-store-redis* supports the latest version of comby (v2), requires Go version 1.22+ and is based on Redis client v9.0.0.
 
 ```shell
-go get github.com/gradientzero/comby-redis-store
+go get github.com/gradientzero/comby-store-redis
 ```
 
 ## Quickstart
 
 ```go
 import (
-	"github.com/gradientzero/comby-redis-store"
+	"github.com/gradientzero/comby-store-redis"
 	"github.com/gradientzero/comby/v2"
 )
 

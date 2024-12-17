@@ -1,4 +1,4 @@
-module github.com/gradientzero/comby-redis-store
+module github.com/gradientzero/comby-store-redis
 
 go 1.22
 
