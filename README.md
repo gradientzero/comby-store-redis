@@ -1,6 +1,6 @@
 # comby-redis-store
 
-Simple implementation of the `CacheStore` interface defined in [comby](https://github.com/gradient0/comby) with Redis. **comby** is a powerful application framework designed with Event Sourcing and Command Query Responsibility Segregation (CQRS) principles, written in Go.
+Simple implementation of the `CacheStore` interface defined in [comby](https://github.com/gradientzero/comby) with Redis. **comby** is a powerful application framework designed with Event Sourcing and Command Query Responsibility Segregation (CQRS) principles, written in Go.
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
