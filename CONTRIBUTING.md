@@ -39,30 +39,7 @@ We use GitHub Issues to track bugs and feature requests. To report a bug:
     - Expected behavior vs. actual behavior.
     - Additional context, logs, or screenshots to help us diagnose the issue.
 
-Here’s an example issue markdown template:
-```markdown
-**Issue Title**: 
-Example bug title
-
-**Steps to Reproduce**:
-1. Run `example-command`.
-2. Provide `example-input`.
-3. Observe `example-output`.
-
-**Expected Behavior**: 
-The application does X.
-
-**Actual Behavior**: 
-Instead, it does Y.
-
-**Environment**:
-- Go version: 1.22.0
-- Redis version: 6.2
-- OS: Ubuntu 22.04
-
-**Additional Notes**: 
-(Include anything else you tried or suspect.)
-```
+Please use the templates provided in the **.github** directory.
 Thorough bug reports help us fix issues faster. Thank you!
 
 ## Submitting Changes via Pull Requests
@@ -94,11 +71,7 @@ git push origin feature/my-new-feature-or-issue-id
 ```
 8. Open a Pull Request targeting the **master** branch.
 
-Please describe:
-- What the PR does and why.
-- Any related issues (e.g., Fixes #123).
-- Steps to test the changes, if applicable.
-
+Please use the templates provided in the **.github** directory.
 
 ## License
 By contributing, you agree that your submissions are licensed under the [MIT License](http://choosealicense.com/licenses/mit/).
