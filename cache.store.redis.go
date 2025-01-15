@@ -22,6 +22,7 @@ func NewCacheStoreRedis(
 	Addr string,
 	Password string,
 	DB int,
+	opts ...comby.CacheStoreOption,
 ) comby.CacheStore {
 	csr := &cacheStoreRedis{
 		options: comby.CacheStoreOptions{},
@@ -30,6 +31,11 @@ func NewCacheStoreRedis(
 			Password: Password,
 			DB:       DB,
 		},
+	}
+	for _, opt := range opts {
+		if _, err := opt(&csr.options); err != nil {
+			return nil
+		}
 	}
 	return csr
 }
