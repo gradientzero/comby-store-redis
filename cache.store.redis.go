@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gradientzero/comby/v2"
@@ -83,11 +84,11 @@ func (csr *cacheStoreRedis) Set(ctx context.Context, opts ...comby.CacheStoreSet
 	return csr.redisClient.Set(ctx, setOpts.Key, setOpts.Value, setOpts.Expiration).Err()
 }
 
-func (csr *cacheStoreRedis) List(ctx context.Context, opts ...comby.CacheStoreListOption) ([]*comby.CacheModel, error) {
+func (csr *cacheStoreRedis) List(ctx context.Context, opts ...comby.CacheStoreListOption) ([]*comby.CacheModel, int64, error) {
 	listOpts := comby.CacheStoreListOptions{}
 	for _, opt := range opts {
 		if _, err := opt(&listOpts); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 	}
 	var items []*comby.CacheModel
@@ -95,23 +96,31 @@ func (csr *cacheStoreRedis) List(ctx context.Context, opts ...comby.CacheStoreLi
 	keys, err := csr.redisClient.Keys(ctx, "*").Result()
 	switch {
 	case err == redis.Nil: // key does not exist
-		return nil, nil
+		return nil, 0, nil
 	case err != nil: // failed to get
-		return nil, err
+		return nil, 0, err
 	}
 
 	for _, key := range keys {
 		value, err := csr.redisClient.Get(ctx, key).Result()
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
-		items = append(items, &comby.CacheModel{
-			Key:       key,
-			Value:     value,
-			ExpiredAt: 0,
-		})
+		valid := len(listOpts.TenantUuid) == 0
+		if !valid {
+			// convention: prefix of key is the tenantUuid "%s-%s"
+			valid = strings.HasPrefix(key, listOpts.TenantUuid)
+		}
+		if valid {
+			items = append(items, &comby.CacheModel{
+				Key:       key,
+				Value:     value,
+				ExpiredAt: 0,
+			})
+		}
 	}
-	return items, nil
+	var total int64 = int64(len(items))
+	return items, total, nil
 }
 
 func (csr *cacheStoreRedis) Delete(ctx context.Context, opts ...comby.CacheStoreDeleteOption) error {

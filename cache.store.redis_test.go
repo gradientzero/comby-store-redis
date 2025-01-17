@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gradientzero/comby-store-redis"
+	store "github.com/gradientzero/comby-store-redis"
 	"github.com/gradientzero/comby/v2"
 )
 
@@ -71,7 +71,7 @@ func TestCacheStore1(t *testing.T) {
 	}
 
 	// List all keys
-	if cacheModels, err := cacheStore.List(ctx); err != nil {
+	if cacheModels, _, err := cacheStore.List(ctx); err != nil {
 		if len(cacheModels) != 3 {
 			t.Fatalf("wrong number of keys: %d", len(cacheModels))
 		}
@@ -97,7 +97,7 @@ func TestCacheStore1(t *testing.T) {
 	}
 
 	// List all keys
-	if cacheModels, err := cacheStore.List(ctx); err == nil {
+	if cacheModels, _, err := cacheStore.List(ctx); err == nil {
 		if len(cacheModels) != 1 {
 			t.Fatalf("wrong number of keys: %d", len(cacheModels))
 		}
