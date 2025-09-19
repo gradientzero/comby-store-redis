@@ -22,7 +22,7 @@ func TestCacheStore1(t *testing.T) {
 	}
 
 	// check if the attribute is set
-	if v, ok := cacheStore.Options().Attributes.Get("key1"); ok {
+	if v := cacheStore.Options().Attributes.Get("key1"); v != nil {
 		if v != "value" {
 			t.Fatalf("wrong value: %q", v)
 		}
