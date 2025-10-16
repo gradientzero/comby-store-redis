@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -66,9 +67,24 @@ func (csr *cacheStoreRedis) Get(ctx context.Context, opts ...comby.CacheStoreGet
 	case err != nil: // failed to get
 		return nil, err
 	}
+
+	valueToReturn := any(value)
+
+	// decrypt value if crypto service is provided
+	if csr.options.CryptoService != nil {
+		// value is stored as string in Redis, convert to []byte for decryption
+		if strValue, ok := valueToReturn.(string); ok {
+			decryptedValue, err := csr.decryptValue([]byte(strValue))
+			if err != nil {
+				return nil, err
+			}
+			valueToReturn = decryptedValue
+		}
+	}
+
 	return &comby.CacheModel{
 		Key:   getOpts.Key,
-		Value: value,
+		Value: valueToReturn,
 	}, nil
 }
 
@@ -81,7 +97,19 @@ func (csr *cacheStoreRedis) Set(ctx context.Context, opts ...comby.CacheStoreSet
 			return err
 		}
 	}
-	return csr.redisClient.Set(ctx, setOpts.Key, setOpts.Value, setOpts.Expiration).Err()
+
+	valueToStore := setOpts.Value
+
+	// encrypt value if crypto service is provided
+	if csr.options.CryptoService != nil {
+		encryptedValue, err := csr.encryptValue(setOpts.Value)
+		if err != nil {
+			return err
+		}
+		valueToStore = encryptedValue
+	}
+
+	return csr.redisClient.Set(ctx, setOpts.Key, valueToStore, setOpts.Expiration).Err()
 }
 
 func (csr *cacheStoreRedis) List(ctx context.Context, opts ...comby.CacheStoreListOption) ([]*comby.CacheModel, int64, error) {
@@ -112,9 +140,24 @@ func (csr *cacheStoreRedis) List(ctx context.Context, opts ...comby.CacheStoreLi
 			valid = strings.HasPrefix(key, listOpts.TenantUuid)
 		}
 		if valid {
+			valueToReturn := any(value)
+
+			// decrypt value if crypto service is provided
+			if csr.options.CryptoService != nil {
+				// value is stored as string in Redis, convert to []byte for decryption
+				if strValue, ok := valueToReturn.(string); ok {
+					decryptedValue, err := csr.decryptValue([]byte(strValue))
+					if err != nil {
+						// skip items that fail to decrypt
+						continue
+					}
+					valueToReturn = decryptedValue
+				}
+			}
+
 			items = append(items, &comby.CacheModel{
 				Key:       key,
-				Value:     value,
+				Value:     valueToReturn,
 				ExpiredAt: 0,
 			})
 		}
@@ -176,4 +219,44 @@ func (csr *cacheStoreRedis) Info(ctx context.Context) (*comby.CacheStoreInfoMode
 
 func (csr *cacheStoreRedis) Reset(ctx context.Context) error {
 	return csr.redisClient.FlushDB(ctx).Err()
+}
+
+func (csr *cacheStoreRedis) encryptValue(value any) ([]byte, error) {
+	if csr.options.CryptoService == nil {
+		return nil, fmt.Errorf("'%s' failed - crypto service is nil", csr.String())
+	}
+	// serialize value to JSON
+	valueBytes, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("'%s' failed - failed to marshal value: %w", csr.String(), err)
+	}
+	if len(valueBytes) < 1 {
+		return nil, fmt.Errorf("'%s' failed - value is empty", csr.String())
+	}
+	// encrypt serialized value
+	encryptedValue, err := csr.options.CryptoService.Encrypt(valueBytes)
+	if err != nil {
+		return nil, fmt.Errorf("'%s' failed - failed to encrypt value: %w", csr.String(), err)
+	}
+	return encryptedValue, nil
+}
+
+func (csr *cacheStoreRedis) decryptValue(encryptedValue []byte) (any, error) {
+	if csr.options.CryptoService == nil {
+		return nil, fmt.Errorf("'%s' failed - crypto service is nil", csr.String())
+	}
+	if len(encryptedValue) < 1 {
+		return nil, fmt.Errorf("'%s' failed - encrypted value is empty", csr.String())
+	}
+	// decrypt value
+	decryptedBytes, err := csr.options.CryptoService.Decrypt(encryptedValue)
+	if err != nil {
+		return nil, fmt.Errorf("'%s' failed - failed to decrypt value: %w", csr.String(), err)
+	}
+	// deserialize JSON to any
+	var value any
+	if err := json.Unmarshal(decryptedBytes, &value); err != nil {
+		return nil, fmt.Errorf("'%s' failed - failed to unmarshal value: %w", csr.String(), err)
+	}
+	return value, nil
 }

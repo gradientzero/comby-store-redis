@@ -2,10 +2,10 @@ module github.com/gradientzero/comby-store-redis
 
 go 1.22.0
 
-replace github.com/gradientzero/comby/v2 v2.3.0 => /Users/me/Documents/gradient0/repos/comby/comby
+replace github.com/gradientzero/comby/v2 v2.4.0 => /Users/me/Documents/gradient0/repos/comby/comby
 
 require (
-	github.com/gradientzero/comby/v2 v2.3.0
+	github.com/gradientzero/comby/v2 v2.4.0
 	github.com/redis/go-redis/v9 v9.0.0
 )
 

@@ -17,6 +17,7 @@
 *.cache
 
 # IDE settings
+.claude/
 .idea/
 .vscode/
 
